@@ -771,6 +771,203 @@
       z-index: 1
     }
 
+    /* CHATBOT */
+    .chatbot-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: white;
+      border: none;
+      box-shadow: 0 4px 20px rgba(79, 142, 247, .4);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      z-index: 999;
+      transition: transform .2s, box-shadow .2s;
+    }
+
+    .chatbot-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 28px rgba(79, 142, 247, .5);
+    }
+
+    .chatbot-btn svg {
+      width: 28px;
+      height: 28px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .chat-window {
+      position: fixed;
+      bottom: 96px;
+      right: 24px;
+      width: 340px;
+      height: 480px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-glow);
+      border-radius: var(--r-lg);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, .5);
+      display: flex;
+      flex-direction: column;
+      z-index: 1000;
+      overflow: hidden;
+      transform-origin: bottom right;
+      transition: transform .3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity .2s;
+      transform: scale(0);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .chat-window.open {
+      transform: scale(1);
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .chat-header {
+      padding: 16px;
+      background: var(--bg-card2);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chat-title {
+      font-weight: 700;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chat-title .indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--ok);
+      box-shadow: 0 0 8px var(--ok);
+    }
+
+    .chat-close {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .chat-close:hover {
+      color: var(--text);
+    }
+
+    .chat-body {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scroll-behavior: smooth;
+    }
+
+    .chat-msg {
+      max-width: 85%;
+      padding: 10px 14px;
+      border-radius: var(--r-md);
+      font-size: 13.5px;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+
+    .chat-msg.bot {
+      background: rgba(79, 142, 247, .1);
+      border: 1px solid rgba(79, 142, 247, .2);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+
+    .chat-msg.user {
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+
+    .chat-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-card2);
+      display: flex;
+      gap: 8px;
+    }
+
+    .chat-input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px;
+      border-radius: var(--r-sm);
+      font-family: inherit;
+      font-size: 13.5px;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .chat-input:focus {
+      border-color: var(--blue);
+    }
+
+    .chat-send,
+    .chat-mic {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      width: 40px;
+      border-radius: var(--r-sm);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: all .2s;
+    }
+
+    .chat-send:hover,
+    .chat-mic:hover {
+      background: var(--bg-hover);
+      color: var(--text);
+      border-color: var(--blue);
+    }
+
+    .chat-mic.listening {
+      background: rgba(255, 45, 85, .15);
+      border-color: var(--danger);
+      color: var(--danger);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(255, 45, 85, 0.4);
+      }
+
+      70% {
+        box-shadow: 0 0 0 6px rgba(255, 45, 85, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(255, 45, 85, 0);
+      }
+    }
+
     @media(max-width:768px) {
       .hdr {
         padding: 14px 18px
@@ -905,6 +1102,51 @@
   <footer>RIFT 2026 Financial Forensics Engine · All processing runs in-browser · No transaction data transmitted
   </footer>
   <div class="cy-tip" id="cy-tip"></div>
+
+  <!-- CHATBOT WIDGET -->
+  <button class="chatbot-btn" id="cb-toggle" title="Open Forensics Assistant">
+    <svg viewBox="0 0 24 24">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    </svg>
+  </button>
+
+  <div class="chat-window" id="cb-window">
+    <div class="chat-header">
+      <div class="chat-title">
+        <div class="indicator"></div> Forensics Assistant
+      </div>
+      <button class="chat-close" id="cb-close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <div class="chat-body" id="cb-body">
+      <div class="chat-msg bot">Hello! I am your visual forensics assistant. You can ask me about smurfing, cycles,
+        shell chains, or how to use the dashboard. Click the microphone to speak!</div>
+    </div>
+    <div class="chat-footer">
+      <input type="text" class="chat-input" id="cb-input" placeholder="Type a message..." autocomplete="off">
+      <button class="chat-mic" id="cb-mic" title="Voice Input (Speech-to-Text)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          <line x1="12" y1="19" x2="12" y2="23"></line>
+          <line x1="8" y1="23" x2="16" y2="23"></line>
+        </svg>
+      </button>
+      <button class="chat-send" id="cb-send">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+  </div>
 
   <script>
     'use strict';
@@ -1407,6 +1649,103 @@ T049,ACC_D,ACC_A,1400,2025-01-09 12:00:00`;
         else if (f === 'rings') { const ids = new Set(result.fraudRings.flatMap(r => r.members)); txs = allTxs.filter(t => ids.has(t.sender_id) || ids.has(t.receiver_id)); }
         renderGraph(txs, result.suspiciousAccounts, result.fraudRings);
       });
+
+      // ════════════════════════════════════════════════════════════
+      // CHATBOT LOGIC
+      // ════════════════════════════════════════════════════════════
+      const cbToggle = document.getElementById('cb-toggle');
+      const cbWindow = document.getElementById('cb-window');
+      const cbClose = document.getElementById('cb-close');
+      const cbBody = document.getElementById('cb-body');
+      const cbInput = document.getElementById('cb-input');
+      const cbSend = document.getElementById('cb-send');
+      const cbMic = document.getElementById('cb-mic');
+
+      cbToggle.addEventListener('click', () => {
+        cbWindow.classList.add('open');
+        cbInput.focus();
+      });
+      cbClose.addEventListener('click', () => cbWindow.classList.remove('open'));
+
+      function addChatMsg(text, isUser) {
+        const d = document.createElement('div');
+        d.className = 'chat-msg ' + (isUser ? 'user' : 'bot');
+        d.textContent = text;
+        cbBody.appendChild(d);
+        cbBody.scrollTop = cbBody.scrollHeight;
+      }
+
+      function speak(text) {
+        if (!('speechSynthesis' in window)) return;
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'en-US';
+        u.pitch = 1.0;
+        u.rate = 1.05;
+        // Try to pick a female voice for the assistant
+        const voices = speechSynthesis.getVoices();
+        const voice = voices.find(v => v.lang.includes('en') && (v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Google US English')));
+        if (voice) u.voice = voice;
+        speechSynthesis.speak(u);
+      }
+
+      function handleChat() {
+        const text = cbInput.value.trim();
+        if (!text) return;
+        cbInput.value = '';
+        addChatMsg(text, true);
+
+        const lower = text.toLowerCase();
+        let reply = "I'm not sure about that. I can help explain cycles, smurfing, shell chains, or how to use the dashboard.";
+
+        if (lower.includes('hello') || lower.includes('hi')) reply = "Hello! I am your forensics assistant. How can I help you analyze transactions today?";
+        else if (lower.includes('how to use') || lower.includes('upload') || lower.includes('help')) reply = "You can drag and drop a transaction CSV file onto the upload area, or use the 'Load Sample Data' button to try a demo.";
+        else if (lower.includes('cycle') || lower.includes('circular')) reply = "A cycle or circular routing occurs when money flows through a series of accounts and returns to the originator. We detect cycles of length 3 to 5 nodes.";
+        else if (lower.includes('smurf') || lower.includes('fan')) reply = "Smurfing relies on breaking large sums into smaller transactions. We look for abnormal bursts of fan-in or fan-out activity—like 10 or more connections within 72 hours.";
+        else if (lower.includes('shell') || lower.includes('chain')) reply = "Shell chains are linear paths of funds moving through burner accounts. We flag paths of 3 to 6 hops where the intermediate nodes have very few overall transactions.";
+        else if (lower.includes('score') || lower.includes('suspicion')) reply = "Suspicion scores range from 0 to 100. They are calculated based on the account's involvement in cycles, smurfing patterns, and shell networks. Critical starts at 70.";
+        else if (lower.includes('download') || lower.includes('json') || lower.includes('export')) reply = "Once an analysis is complete, you can click the 'Download JSON Report' button in the top right to get the exact structured output.";
+
+        setTimeout(() => {
+          addChatMsg(reply, false);
+          speak(reply);
+        }, 500);
+      }
+
+      cbSend.addEventListener('click', handleChat);
+      cbInput.addEventListener('keypress', e => { if (e.key === 'Enter') handleChat(); });
+
+      // Speech Recognition setup
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = () => { cbMic.classList.add('listening'); };
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          cbInput.value = transcript;
+          handleChat();
+        };
+        recognition.onerror = (event) => { console.error('Speech recognition error', event.error); cbMic.classList.remove('listening'); };
+        recognition.onend = () => { cbMic.classList.remove('listening'); };
+
+        cbMic.addEventListener('click', () => {
+          if (cbMic.classList.contains('listening')) { recognition.stop(); }
+          else { recognition.start(); }
+        });
+      } else {
+        cbMic.style.display = 'none'; // hide if not supported
+      }
+
+      // Request voices immediately to avoid delay on first speak
+      if ('speechSynthesis' in window) {
+        speechSynthesis.getVoices();
+        speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+      }
+
     });
   </script>
 </body>
