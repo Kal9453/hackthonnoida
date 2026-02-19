@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>RIFT 2026 | Financial Forensics Engine</title>
   <meta name="description"
     content="RIFT 2026 Money Muling Detection – Detect circular fund routing, smurfing, and shell chains from transaction CSV data." />
@@ -23,15 +23,15 @@
     }
 
     :root {
-      --bg: #070b1a;
-      --bg-card: #0d1230;
-      --bg-card2: #111830;
-      --bg-hover: #161e3a;
-      --border: #1e2850;
-      --border-glow: #2d3a80;
+      --bg: #060a18;
+      --bg-card: #0c1028;
+      --bg-card2: #10162e;
+      --bg-hover: #141c36;
+      --border: #1a2248;
+      --border-glow: #29357a;
       --text: #e8eaf6;
       --muted: #7986cb;
-      --dim: #3f4c8a;
+      --dim: #3a4580;
       --blue: #4f8ef7;
       --purple: #9c6bff;
       --cyan: #00e5ff;
@@ -60,19 +60,16 @@
       content: '';
       position: fixed;
       inset: 0;
-      background:
-        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(79, 142, 247, .06) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 50% at 80% 90%, rgba(156, 107, 255, .06) 0%, transparent 60%),
-        radial-gradient(ellipse 40% 40% at 60% 40%, rgba(255, 45, 85, .04) 0%, transparent 50%);
+      background: radial-gradient(ellipse 80% 60% at 20% 10%, rgba(79, 142, 247, .07) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 80% 90%, rgba(156, 107, 255, .07) 0%, transparent 60%), radial-gradient(ellipse 40% 40% at 60% 40%, rgba(255, 45, 85, .04) 0%, transparent 50%);
       pointer-events: none;
       z-index: 0
     }
 
-    /* Header */
+    /* HEADER */
     .hdr {
       position: relative;
       z-index: 10;
-      padding: 22px 36px 18px;
+      padding: 20px 36px 16px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
@@ -88,19 +85,19 @@
     }
 
     .hdr-badge {
-      width: 46px;
-      height: 46px;
+      width: 44px;
+      height: 44px;
       border-radius: 12px;
       background: linear-gradient(135deg, #4f8ef7, #9c6bff);
       display: grid;
       place-items: center;
-      font-size: 22px;
+      font-size: 20px;
       box-shadow: 0 0 24px rgba(79, 142, 247, .4);
       flex-shrink: 0
     }
 
     .hdr-title {
-      font-size: clamp(1rem, 2.5vw, 1.4rem);
+      font-size: clamp(.95rem, 2.5vw, 1.35rem);
       font-weight: 800;
       letter-spacing: -.02em;
       background: linear-gradient(135deg, #e8eaf6 30%, #4f8ef7 60%, #9c6bff 100%);
@@ -111,7 +108,7 @@
     }
 
     .hdr-sub {
-      font-size: .72rem;
+      font-size: .7rem;
       color: var(--muted);
       letter-spacing: .08em;
       text-transform: uppercase;
@@ -125,7 +122,7 @@
       flex-wrap: wrap
     }
 
-    /* Buttons */
+    /* BUTTONS */
     .btn {
       display: inline-flex;
       align-items: center;
@@ -175,36 +172,36 @@
       border: 1px solid var(--border)
     }
 
-    .btn-ghost:hover {
+    .btn-ghost:hover:not(:disabled) {
       background: var(--bg-hover);
       color: var(--text);
       border-color: var(--border-glow)
     }
 
-    /* Main */
+    /* MAIN */
     main {
       position: relative;
       z-index: 1;
-      padding: 28px 36px 60px;
+      padding: 24px 36px 60px;
       max-width: 1600px;
       margin: 0 auto
     }
 
-    /* Stats bar */
+    /* STATS */
     .stats-bar {
       display: none;
       gap: 10px;
       flex-wrap: wrap;
-      margin-bottom: 22px
+      margin-bottom: 20px
     }
 
     .stat-card {
       flex: 1;
-      min-width: 105px;
+      min-width: 100px;
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--r-md);
-      padding: 13px 16px;
+      padding: 12px 16px;
       display: flex;
       flex-direction: column;
       gap: 3px;
@@ -223,7 +220,7 @@
     }
 
     .stat-val {
-      font-size: 1.55rem;
+      font-size: 1.5rem;
       font-weight: 800;
       font-family: 'Space Mono', monospace
     }
@@ -248,7 +245,7 @@
       color: var(--purple)
     }
 
-    /* Upload */
+    /* UPLOAD */
     #upload-sec {
       margin-bottom: 24px
     }
@@ -281,8 +278,8 @@
     }
 
     .upload-icon {
-      width: 70px;
-      height: 70px;
+      width: 68px;
+      height: 68px;
       margin: 0 auto 18px;
       background: linear-gradient(135deg, rgba(79, 142, 247, .15), rgba(156, 107, 255, .15));
       border: 2px solid rgba(79, 142, 247, .3);
@@ -305,7 +302,7 @@
     }
 
     .upload-title {
-      font-size: 1.25rem;
+      font-size: 1.2rem;
       font-weight: 700;
       margin-bottom: 8px
     }
@@ -341,7 +338,7 @@
       border-radius: 20px
     }
 
-    /* Processing */
+    /* PROCESSING */
     #proc-sec {
       display: none;
       margin-bottom: 24px
@@ -356,8 +353,8 @@
     }
 
     .spinner {
-      width: 54px;
-      height: 54px;
+      width: 52px;
+      height: 52px;
       margin: 0 auto 18px;
       border: 3px solid rgba(79, 142, 247, .15);
       border-top: 3px solid var(--blue);
@@ -400,7 +397,7 @@
       box-shadow: 0 0 12px rgba(79, 142, 247, .5)
     }
 
-    /* Error */
+    /* ERROR */
     #err-banner {
       display: none;
       background: rgba(255, 45, 85, .12);
@@ -412,7 +409,7 @@
       margin-bottom: 18px
     }
 
-    /* Graph */
+    /* GRAPH */
     #graph-sec {
       display: none;
       margin-bottom: 24px
@@ -429,7 +426,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 13px 18px;
+      padding: 12px 18px;
       border-bottom: 1px solid var(--border);
       flex-wrap: wrap;
       gap: 8px
@@ -509,8 +506,8 @@
 
     #cy {
       width: 100%;
-      height: 500px;
-      background: #06091a
+      height: 520px;
+      background: #05081a
     }
 
     #node-panel {
@@ -518,23 +515,33 @@
       position: absolute;
       top: 10px;
       right: 10px;
-      background: rgba(13, 18, 48, .95);
+      background: rgba(12, 16, 40, .96);
       border: 1px solid var(--border-glow);
       border-radius: var(--r-md);
-      padding: 13px 16px;
+      padding: 14px 16px;
       font-size: .85rem;
       backdrop-filter: blur(12px);
-      min-width: 170px;
+      min-width: 180px;
       z-index: 100
     }
 
     #node-panel h4 {
       font-size: .88rem;
-      margin-bottom: 7px;
+      margin-bottom: 8px;
       color: var(--blue)
     }
 
-    /* Results */
+    #node-panel p {
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: .8rem
+    }
+
+    #node-panel strong {
+      color: var(--text)
+    }
+
+    /* RESULTS */
     #results-sec {
       display: none
     }
@@ -565,7 +572,7 @@
       }
     }
 
-    /* Table sections */
+    /* TABLES */
     .tbl-sec {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -579,7 +586,7 @@
       gap: 7px;
       font-size: .9rem;
       font-weight: 700;
-      padding: 13px 18px;
+      padding: 12px 18px;
       border-bottom: 1px solid var(--border);
       background: var(--bg-card2)
     }
@@ -614,7 +621,7 @@
     }
 
     th {
-      background: #0a0f26;
+      background: #090d22;
       color: var(--muted);
       padding: 9px 13px;
       text-align: left;
@@ -650,7 +657,7 @@
       font-family: 'Space Mono', monospace;
       font-size: 11px;
       color: var(--muted);
-      max-width: 190px;
+      max-width: 200px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap
@@ -662,7 +669,7 @@
       padding: 28px 13px
     }
 
-    /* Score pills */
+    /* PILLS & BADGES */
     .pill {
       display: inline-block;
       padding: 3px 9px;
@@ -690,7 +697,6 @@
       border: 1px solid rgba(6, 214, 160, .3)
     }
 
-    /* Badges */
     .badge {
       display: inline-block;
       padding: 2px 7px;
@@ -712,17 +718,17 @@
       border: 1px solid rgba(255, 209, 102, .3)
     }
 
-    .b-shell {
+    .b-shell-chain {
       background: rgba(156, 107, 255, .15);
       color: #b388ff;
       border: 1px solid rgba(156, 107, 255, .3)
     }
 
-    /* Tooltip */
+    /* TOOLTIP */
     .cy-tip {
       position: fixed;
       z-index: 9999;
-      background: rgba(13, 18, 48, .95);
+      background: rgba(12, 16, 40, .96);
       border: 1px solid var(--border-glow);
       color: var(--text);
       padding: 9px 13px;
@@ -730,13 +736,13 @@
       font-size: 12px;
       line-height: 1.6;
       pointer-events: none;
-      max-width: 190px;
+      max-width: 200px;
       backdrop-filter: blur(8px);
       box-shadow: 0 8px 24px rgba(0, 0, 0, .4);
       display: none
     }
 
-    /* Scrollbar */
+    /* SCROLLBAR */
     ::-webkit-scrollbar {
       width: 5px;
       height: 5px
@@ -829,16 +835,17 @@
           </svg>
         </div>
         <div class="upload-title">Drop your transaction CSV here</div>
-        <div class="upload-sub">CSV with columns: transaction_id, sender_id, receiver_id, amount, timestamp · 10K+ rows
-          supported</div>
+        <div class="upload-sub">Required columns: transaction_id, sender_id, receiver_id, amount, timestamp (YYYY-MM-DD
+          HH:MM:SS)</div>
         <div class="upload-acts">
           <button class="btn btn-pri" onclick="document.getElementById('file-in').click();event.stopPropagation()">📂
             Choose CSV File</button>
           <button class="btn btn-ghost" id="btn-demo">⚗️ Load Sample Data</button>
         </div>
         <div class="csv-hint">
-          <span class="csv-tag">transaction_id</span><span class="csv-tag">sender_id</span><span
-            class="csv-tag">receiver_id</span><span class="csv-tag">amount</span><span class="csv-tag">timestamp</span>
+          <span class="csv-tag">transaction_id</span><span class="csv-tag">sender_id</span>
+          <span class="csv-tag">receiver_id</span><span class="csv-tag">amount</span><span
+            class="csv-tag">timestamp</span>
         </div>
         <input type="file" id="file-in" accept=".csv,text/csv" style="display:none" />
       </div>
@@ -878,8 +885,9 @@
           <div id="cy"></div>
           <div id="node-panel">
             <h4 id="np-id">—</h4>
-            <p id="np-score"></p>
-            <p id="np-cat"></p>
+            <p>Score: <strong id="np-score">—</strong>/100</p>
+            <p>Category: <strong id="np-cat">—</strong></p>
+            <p id="np-flags" style="margin-top:6px"></p>
           </div>
         </div>
       </div>
@@ -899,9 +907,19 @@
   <div class="cy-tip" id="cy-tip"></div>
 
   <script>
-    // ═══════════════════════════════════════════════════════
+    'use strict';
+    // ════════════════════════════════════════════════════════════
+    // CONSTANTS
+    // ════════════════════════════════════════════════════════════
+    const CYCLE_MIN = 3, CYCLE_MAX = 5, CYCLE_BUDGET = 600;
+    const SMURF_N = 10, SMURF_MS = 72 * 3600 * 1000;
+    const SHELL_MIN = 3, SHELL_MAX = 6, SHELL_TX = 3, SHELL_BUDGET = 12000;
+    const SCORE_CYCLE = 35, SCORE_SMURF = 30, SCORE_SHELL = 25;
+    const GRAPH_MAX_NODES = 400;
+
+    // ════════════════════════════════════════════════════════════
     // PARSER
-    // ═══════════════════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════
     function parseCSV(text) {
       return new Promise((res, rej) => {
         Papa.parse(text, {
@@ -928,76 +946,70 @@
       });
     }
 
-    // ═══════════════════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════
     // GRAPH BUILDER
-    // ═══════════════════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════
     function buildGraph(txs) {
       const outgoing = new Map(), incoming = new Map(), nodes = new Set();
       const nodeOut = new Map(), nodeIn = new Map();
       const nodeTxCount = new Map(), nodeAmounts = new Map();
-
       for (const { sender_id: s, receiver_id: r, amount, timestamp } of txs) {
         nodes.add(s); nodes.add(r);
-        if (!outgoing.has(s)) outgoing.set(s, new Set());
-        outgoing.get(s).add(r);
-        if (!incoming.has(r)) incoming.set(r, new Set());
-        incoming.get(r).add(s);
-        if (!nodeOut.has(s)) nodeOut.set(s, []);
-        nodeOut.get(s).push({ to: r, amount, ts: timestamp });
-        if (!nodeIn.has(r)) nodeIn.set(r, []);
-        nodeIn.get(r).push({ from: s, amount, ts: timestamp });
+        if (!outgoing.has(s)) outgoing.set(s, new Set()); outgoing.get(s).add(r);
+        if (!incoming.has(r)) incoming.set(r, new Set()); incoming.get(r).add(s);
+        if (!nodeOut.has(s)) nodeOut.set(s, []); nodeOut.get(s).push({ to: r, amount, ts: timestamp });
+        if (!nodeIn.has(r)) nodeIn.set(r, []); nodeIn.get(r).push({ from: s, amount, ts: timestamp });
         nodeTxCount.set(s, (nodeTxCount.get(s) || 0) + 1);
         nodeTxCount.set(r, (nodeTxCount.get(r) || 0) + 1);
-        if (!nodeAmounts.has(s)) nodeAmounts.set(s, []);
-        nodeAmounts.get(s).push(amount);
-        if (!nodeAmounts.has(r)) nodeAmounts.set(r, []);
-        nodeAmounts.get(r).push(amount);
+        if (!nodeAmounts.has(s)) nodeAmounts.set(s, []); nodeAmounts.get(s).push(amount);
+        if (!nodeAmounts.has(r)) nodeAmounts.set(r, []); nodeAmounts.get(r).push(amount);
       }
       return { nodes, outgoing, incoming, nodeOut, nodeIn, nodeTxCount, nodeAmounts };
     }
 
     function merchantThreshold(nodeAmounts) {
       const avgs = [];
-      for (const [, amounts] of nodeAmounts) {
-        avgs.push(amounts.reduce((a, b) => a + b, 0) / amounts.length);
-      }
+      for (const [, amounts] of nodeAmounts) { avgs.push(amounts.reduce((a, b) => a + b, 0) / amounts.length); }
       avgs.sort((a, b) => a - b);
       return avgs[Math.floor(avgs.length * 0.95)] || Infinity;
     }
 
-    // ═══════════════════════════════════════════════════════
-    // ALGORITHMS
-    // ═══════════════════════════════════════════════════════
-    const CYCLE_MIN = 3, CYCLE_MAX = 5;
-    const SMURF_N = 10, SMURF_MS = 72 * 3600 * 1000;
-    const SHELL_MIN = 3, SHELL_MAX = 6, SHELL_TX = 3;
-
+    // ════════════════════════════════════════════════════════════
+    // CYCLE DETECTION (DFS)
+    // ════════════════════════════════════════════════════════════
     function detectCycles(graph) {
       const { outgoing, nodes } = graph;
       const cycles = [], seen = new Set();
+      let found = 0;
       function norm(c) { let m = 0; c.forEach((n, i) => { if (n < c[m]) m = i; }); return [...c.slice(m), ...c.slice(0, m)]; }
       function dfs(start, cur, path, vis) {
+        if (found >= CYCLE_BUDGET) return;
         for (const nb of (outgoing.get(cur) || new Set())) {
+          if (found >= CYCLE_BUDGET) return;
           if (nb === start && path.length >= CYCLE_MIN && path.length <= CYCLE_MAX) {
             const key = norm([...path]).join('→');
-            if (!seen.has(key)) { seen.add(key); cycles.push([...path]); }
+            if (!seen.has(key)) { seen.add(key); cycles.push([...path]); found++; }
           } else if (!vis.has(nb) && path.length < CYCLE_MAX) {
             vis.add(nb); path.push(nb); dfs(start, nb, path, vis); path.pop(); vis.delete(nb);
           }
         }
       }
-      for (const n of nodes) { const v = new Set([n]); dfs(n, n, [n], v); }
+      for (const n of nodes) { if (found >= CYCLE_BUDGET) break; const v = new Set([n]); dfs(n, n, [n], v); }
       return cycles;
     }
 
-    function detectSmurfing(graph, merchThresh) {
+    // ════════════════════════════════════════════════════════════
+    // SMURFING DETECTION
+    // ════════════════════════════════════════════════════════════
+    function detectSmurfing(graph, thresh) {
       const { nodes, nodeOut, nodeIn, nodeAmounts } = graph;
       const smurfs = new Set(), details = new Map();
       for (const node of nodes) {
         const amounts = nodeAmounts.get(node) || [];
         const avg = amounts.length ? amounts.reduce((a, b) => a + b, 0) / amounts.length : 0;
         const outE = nodeOut.get(node) || [], inE = nodeIn.get(node) || [];
-        if (avg > merchThresh && outE.length < inE.length * 0.1) continue;
+        // Exclude high-volume merchants: high avg amount + mostly receives
+        if (avg > thresh && outE.length < inE.length * 0.1) continue;
         let maxIn = 0, maxOut = 0;
         if (inE.length >= SMURF_N) {
           const s = [...inE].sort((a, b) => a.ts - b.ts);
@@ -1022,10 +1034,16 @@
       return { smurfs, details };
     }
 
+    // ════════════════════════════════════════════════════════════
+    // SHELL CHAIN DETECTION
+    // ════════════════════════════════════════════════════════════
     function detectShells(graph) {
       const { nodes, outgoing, nodeTxCount } = graph;
       const shellNodes = new Set(), chains = [], keys = new Set();
+      let budget = 0;
       function dfs(start, cur, path, depth) {
+        if (budget >= SHELL_BUDGET) return;
+        budget++;
         if (depth >= SHELL_MIN) {
           const ints = path.slice(1, -1);
           if (ints.some(n => (nodeTxCount.get(n) || 0) <= SHELL_TX)) {
@@ -1043,11 +1061,15 @@
         }
       }
       for (const n of nodes) {
+        if (budget >= SHELL_BUDGET) break;
         if ((nodeTxCount.get(n) || 0) > 0 && (outgoing.get(n) || new Set()).size > 0) dfs(n, n, [n], 0);
       }
       return { shellNodes, chains };
     }
 
+    // ════════════════════════════════════════════════════════════
+    // SCORE COMPUTATION
+    // ════════════════════════════════════════════════════════════
     function computeScores(graph, cycles, smurfRes, shellRes) {
       const { nodeTxCount } = graph;
       const { smurfs, details } = smurfRes;
@@ -1056,9 +1078,23 @@
       cycles.forEach((c, i) => c.forEach(n => { if (!nodeCycles.has(n)) nodeCycles.set(n, []); nodeCycles.get(n).push(i); }));
       const accs = new Map();
       const ensure = id => { if (!accs.has(id)) accs.set(id, { account_id: id, raw: 0, flags: new Set(), rings: new Set(), flaggedTx: 0 }); return accs.get(id); };
-      for (const [n, idxs] of nodeCycles) { const a = ensure(n); a.flags.add('cycle'); a.raw += 35 * idxs.length; a.flaggedTx += idxs.length; idxs.forEach(i => a.rings.add('ring_' + String(i + 1).padStart(2, '0'))); }
-      for (const n of smurfs) { const a = ensure(n); a.flags.add('smurfing'); const d = details.get(n); if (d.fanIn >= SMURF_N) a.raw += 30; if (d.fanOut >= SMURF_N) a.raw += 30; a.flaggedTx += (d.fanIn || 0) + (d.fanOut || 0); }
-      for (const n of shellNodes) { const a = ensure(n); a.flags.add('shell_chain'); a.raw += 25; a.flaggedTx += nodeTxCount.get(n) || 0; }
+      for (const [n, idxs] of nodeCycles) {
+        const a = ensure(n); a.flags.add('cycle');
+        a.raw += SCORE_CYCLE * Math.min(idxs.length, 3);// cap multi-cycle bonus
+        a.flaggedTx += idxs.length;
+        idxs.forEach(i => a.rings.add('ring_' + String(i + 1).padStart(2, '0')));
+      }
+      for (const n of smurfs) {
+        const a = ensure(n); a.flags.add('smurfing');
+        const d = details.get(n);
+        if (d.fanIn >= SMURF_N) a.raw += SCORE_SMURF;
+        if (d.fanOut >= SMURF_N) a.raw += SCORE_SMURF;
+        a.flaggedTx += (d.fanIn || 0) + (d.fanOut || 0);
+      }
+      for (const n of shellNodes) {
+        const a = ensure(n); a.flags.add('shell_chain');
+        a.raw += SCORE_SHELL; a.flaggedTx += nodeTxCount.get(n) || 0;
+      }
       const out = [];
       for (const [, a] of accs) {
         const sc = Math.min(100, Math.round(a.raw));
@@ -1067,6 +1103,9 @@
       return out.sort((a, b) => b.suspicion_score - a.suspicion_score);
     }
 
+    // ════════════════════════════════════════════════════════════
+    // FRAUD RING BUILDER
+    // ════════════════════════════════════════════════════════════
     function buildRings(cycles, shellRes, txs) {
       const lut = new Map();
       for (const t of txs) { const k = `${t.sender_id}→${t.receiver_id}`; if (!lut.has(k)) lut.set(k, []); lut.get(k).push(t.amount); }
@@ -1093,51 +1132,53 @@
       return { cycles, smurfRes, shellRes, suspiciousAccounts, fraudRings };
     }
 
-    // ═══════════════════════════════════════════════════════
-    // VISUALIZER
-    // ═══════════════════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════
+    // VISUALIZER (Cytoscape.js)
+    // ════════════════════════════════════════════════════════════
     let cy = null;
     function initViz() {
       cy = cytoscape({
         container: document.getElementById('cy'),
         style: [
-          { selector: 'node', style: { 'background-color': '#1e2140', 'border-color': '#3a3f5c', 'border-width': 2, 'label': 'data(label)', 'color': '#c5cae9', 'font-size': '10px', 'font-family': 'Inter,sans-serif', 'text-valign': 'center', 'text-halign': 'center', 'width': 38, 'height': 38, 'text-wrap': 'ellipsis', 'text-max-width': '68px' } },
-          { selector: 'node.critical', style: { 'background-color': 'rgba(255,45,85,0.12)', 'border-color': '#ff2d55', 'border-width': 3, 'color': '#ff6b8a', 'width': 54, 'height': 54, 'font-weight': 'bold' } },
-          { selector: 'node.warning', style: { 'background-color': 'rgba(255,209,102,0.1)', 'border-color': '#ffd166', 'border-width': 2.5, 'color': '#ffd166', 'width': 46, 'height': 46 } },
-          { selector: 'edge', style: { 'width': 1.5, 'line-color': '#2a2f50', 'target-arrow-color': '#2a2f50', 'target-arrow-shape': 'triangle', 'curve-style': 'bezier', 'opacity': 0.6, 'arrow-scale': 0.8 } },
-          { selector: 'edge.ring-edge', style: { 'line-color': '#ff6b6b', 'target-arrow-color': '#ff6b6b', 'width': 2.5, 'opacity': 0.9 } },
+          { selector: 'node', style: { 'background-color': '#1a1f42', 'border-color': '#353c68', 'border-width': 2, 'label': 'data(label)', 'color': '#c5cae9', 'font-size': '10px', 'font-family': 'Inter,sans-serif', 'text-valign': 'center', 'text-halign': 'center', 'width': 36, 'height': 36, 'text-wrap': 'ellipsis', 'text-max-width': '70px' } },
+          { selector: 'node.critical', style: { 'background-color': 'rgba(255,45,85,.15)', 'border-color': '#ff2d55', 'border-width': 3, 'color': '#ff6b8a', 'width': 52, 'height': 52, 'font-weight': 'bold', 'font-size': '11px' } },
+          { selector: 'node.warning', style: { 'background-color': 'rgba(255,209,102,.1)', 'border-color': '#ffd166', 'border-width': 2.5, 'color': '#ffd166', 'width': 44, 'height': 44, 'font-size': '10px' } },
+          { selector: 'edge', style: { 'width': 1.5, 'line-color': '#252b50', 'target-arrow-color': '#252b50', 'target-arrow-shape': 'triangle', 'curve-style': 'bezier', 'opacity': 0.55, 'arrow-scale': 0.8 } },
+          { selector: 'edge.ring-edge', style: { 'line-color': '#ff5555', 'target-arrow-color': '#ff5555', 'width': 2.5, 'opacity': 0.9 } },
+          { selector: 'edge.shell-edge', style: { 'line-color': '#9c6bff', 'target-arrow-color': '#9c6bff', 'width': 2, 'opacity': 0.8 } },
           { selector: 'node:selected', style: { 'border-color': '#b388ff', 'border-width': 4 } }
         ],
-        minZoom: 0.1, maxZoom: 4, wheelSensitivity: 0.3
+        minZoom: 0.08, maxZoom: 4, wheelSensitivity: 0.3
       });
+      const tip = document.getElementById('cy-tip');
       cy.on('mouseover', 'node', e => {
         const d = e.target.data();
-        const tip = document.getElementById('cy-tip');
         const cr = document.getElementById('cy').getBoundingClientRect();
         const rp = e.renderedPosition;
-        tip.innerHTML = `<strong>${esc(d.label)}</strong><br>Score: <span style="color:${d.score >= 70 ? '#ff4d6d' : d.score >= 40 ? '#ffd166' : '#06d6a0'}">${d.score}</span>/100`;
-        tip.style.left = (cr.left + rp.x + 10) + 'px';
-        tip.style.top = (cr.top + rp.y + 10) + 'px';
-        tip.style.display = 'block';
+        tip.innerHTML = `<strong>${esc(d.label)}</strong><br>Score: <span style="color:${d.score >= 70 ? '#ff4d6d' : d.score >= 40 ? '#ffd166' : '#06d6a0'}">${d.score}</span>/100<br><span style="color:#7986cb;font-size:11px">${d.category}</span>`;
+        tip.style.left = (cr.left + rp.x + 12) + 'px'; tip.style.top = (cr.top + rp.y + 12) + 'px'; tip.style.display = 'block';
       });
-      cy.on('mouseout', 'node', () => document.getElementById('cy-tip').style.display = 'none');
+      cy.on('mouseout', 'node', () => tip.style.display = 'none');
       cy.on('tap', 'node', e => {
         const d = e.target.data();
         document.getElementById('np-id').textContent = d.id;
-        document.getElementById('np-score').innerHTML = 'Score: <strong style="color:' + (d.score >= 70 ? '#ff4d6d' : d.score >= 40 ? '#ffd166' : '#06d6a0') + '">' + d.score + '</strong>/100';
-        document.getElementById('np-cat').textContent = 'Category: ' + d.category;
+        document.getElementById('np-score').innerHTML = '<span style="color:' + (d.score >= 70 ? '#ff4d6d' : d.score >= 40 ? '#ffd166' : '#06d6a0') + '">' + d.score + '</span>';
+        document.getElementById('np-cat').textContent = d.category;
+        const flagsEl = document.getElementById('np-flags');
+        flagsEl.innerHTML = d.flags ? d.flags.map(f => `<span class="badge b-${f.replace('_', '-')}">${f.replace('_', ' ')}</span>`).join('') : '';
         document.getElementById('node-panel').style.display = 'block';
       });
+      cy.on('tap', e => { if (e.target === cy) document.getElementById('node-panel').style.display = 'none'; });
     }
 
-    function renderGraph(txs, suspAccs, rings, maxN = 300) {
+    function renderGraph(txs, suspAccs, rings, maxN = GRAPH_MAX_NODES) {
       if (!cy) return;
       cy.elements().remove();
-      const scoreMap = new Map(suspAccs.map(a => [a.account_id, a.suspicion_score]));
-      const ringEdges = new Set();
+      const scoreMap = new Map(suspAccs.map(a => [a.account_id, { score: a.suspicion_score, flags: a.flags }]));
+      const ringEdges = new Set(), shellEdges = new Set();
       for (const r of rings) {
         if (r.type === 'circular_routing') { for (let i = 0; i < r.members.length; i++)ringEdges.add(r.members[i] + '→' + r.members[(i + 1) % r.members.length]); }
-        else { for (let i = 0; i < r.members.length - 1; i++)ringEdges.add(r.members[i] + '→' + r.members[i + 1]); }
+        else { for (let i = 0; i < r.members.length - 1; i++)shellEdges.add(r.members[i] + '→' + r.members[i + 1]); }
       }
       let disp = txs;
       if (txs.length > maxN * 3) {
@@ -1150,9 +1191,10 @@
       for (const t of disp) { nids.add(t.sender_id); nids.add(t.receiver_id); }
       const els = [];
       for (const id of nids) {
-        const sc = scoreMap.get(id) || 0;
+        const info = scoreMap.get(id) || { score: 0, flags: [] };
+        const sc = info.score;
         const cat = sc >= 70 ? 'critical' : sc >= 40 ? 'warning' : 'normal';
-        els.push({ data: { id, label: id, score: sc, category: cat }, classes: cat });
+        els.push({ data: { id, label: id, score: sc, category: cat, flags: info.flags }, classes: cat });
       }
       const eMap = new Map();
       for (const t of disp) {
@@ -1163,27 +1205,28 @@
       let ei = 0;
       for (const [k, v] of eMap) {
         const [s, t] = k.split('→');
-        els.push({ data: { id: 'e' + (ei++), source: s, target: t, ring: ringEdges.has(k) }, classes: ringEdges.has(k) ? 'ring-edge' : 'normal-edge' });
+        const cls = ringEdges.has(k) ? 'ring-edge' : shellEdges.has(k) ? 'shell-edge' : '';
+        els.push({ data: { id: 'e' + (ei++), source: s, target: t, weight: v.cnt }, classes: cls });
       }
       cy.add(els);
-      cy.layout({ name: 'cose', idealEdgeLength: 100, nodeOverlap: 20, randomize: false, componentSpacing: 100, nodeRepulsion: 450000, edgeElasticity: 100, gravity: 80, numIter: 1000, initialTemp: 200, coolingFactor: 0.95, minTemp: 1.0, fit: true, padding: 40 }).run();
+      cy.layout({ name: 'cose', idealEdgeLength: 110, nodeOverlap: 20, randomize: false, componentSpacing: 120, nodeRepulsion: 400000, edgeElasticity: 100, gravity: 80, numIter: 1000, initialTemp: 200, coolingFactor: 0.95, minTemp: 1.0, fit: true, padding: 40 }).run();
     }
 
-    // ═══════════════════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════
     // REPORTER
-    // ═══════════════════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════
     function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
     function renderTable(rings, accs) {
       const c = document.getElementById('results-container');
       if (!c) return;
-      const topAccs = accs.slice(0, 25);
-      const aRows = topAccs.map(a => {
+      const aRows = accs.slice(0, 50).map(a => {
         const pc = a.suspicion_score >= 70 ? 'pill-hi' : a.suspicion_score >= 40 ? 'pill-md' : 'pill-lo';
         const badges = a.flags.map(f => `<span class="badge b-${f.replace('_', '-')}">${f.replace('_', ' ')}</span>`).join('');
-        return `<tr><td class="mono">${esc(a.account_id)}</td><td><span class="pill ${pc}">${a.suspicion_score}</span></td><td>${badges}</td><td>${a.transactions_flagged}</td><td>${a.involved_in_rings.length ? a.involved_in_rings.join(', ') : '—'}</td></tr>`;
+        const rings_str = a.involved_in_rings.length ? a.involved_in_rings.slice(0, 3).join(', ') + (a.involved_in_rings.length > 3 ? '…' : '') : '—';
+        return `<tr><td class="mono">${esc(a.account_id)}</td><td><span class="pill ${pc}">${a.suspicion_score}</span></td><td>${badges}</td><td>${a.transactions_flagged}</td><td style="font-size:11px;color:var(--muted)">${rings_str}</td></tr>`;
       }).join('');
-      const rRows = rings.slice(0, 30).map(r => {
+      const rRows = rings.slice(0, 40).map(r => {
         const tl = r.type === 'circular_routing' ? '🔄 Circular' : '🔗 Shell Chain';
         const mem = r.members.slice(0, 3).map(esc).join(' → ') + (r.members.length > 3 ? ` …+${r.members.length - 3}` : '');
         return `<tr><td class="mono">${esc(r.ring_id)}</td><td>${tl}</td><td>${r.members.length}</td><td>$${r.total_amount.toLocaleString()}</td><td>${r.transaction_count}</td><td class="mbrs" title="${esc(r.members.join(' → '))}">${mem}</td></tr>`;
@@ -1191,25 +1234,25 @@
       c.innerHTML = `<div class="res-grid">
     <div class="tbl-sec">
       <div class="sec-title">🛡️ Suspicious Accounts<span class="cnt-badge">${accs.length}</span></div>
-      <div class="tbl-wrap"><table><thead><tr><th>Account ID</th><th>Score</th><th>Flags</th><th>Txns</th><th>Rings</th></tr></thead>
-      <tbody>${aRows || '<tr><td colspan="5" class="empty-r">None detected</td></tr>'}</tbody></table></div>
+      <div class="tbl-wrap"><table><thead><tr><th>Account ID</th><th>Score</th><th>Flags</th><th>Txns Flagged</th><th>Ring IDs</th></tr></thead>
+      <tbody>${aRows || '<tr><td colspan="5" class="empty-r">No suspicious accounts detected</td></tr>'}</tbody></table></div>
     </div>
     <div class="tbl-sec">
       <div class="sec-title">🌐 Fraud Rings<span class="cnt-badge">${rings.length}</span></div>
       <div class="tbl-wrap"><table><thead><tr><th>Ring ID</th><th>Type</th><th>Members</th><th>Amount</th><th>Txns</th><th>Path</th></tr></thead>
-      <tbody>${rRows || '<tr><td colspan="6" class="empty-r">None detected</td></tr>'}</tbody></table></div>
+      <tbody>${rRows || '<tr><td colspan="6" class="empty-r">No fraud rings detected</td></tr>'}</tbody></table></div>
     </div>
   </div>`;
     }
 
-    // ═══════════════════════════════════════════════════════
-    // APP STATE
-    // ═══════════════════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════
+    // APP STATE & ORCHESTRATION
+    // ════════════════════════════════════════════════════════════
     let result = null, allTxs = null;
 
     function setStatus(msg, pct) { document.getElementById('status-text').textContent = msg; document.getElementById('prog-fill').style.width = pct + '%'; }
-    function showErr(m) { const e = document.getElementById('err-banner'); e.textContent = '⚠️ ' + m; e.style.display = 'block'; setTimeout(() => e.style.display = 'none', 6000); }
-    function tick() { return new Promise(r => setTimeout(r, 0)); }
+    function showErr(m) { const e = document.getElementById('err-banner'); e.textContent = '⚠️ ' + m; e.style.display = 'block'; setTimeout(() => e.style.display = 'none', 7000); }
+    const tick = () => new Promise(r => setTimeout(r, 0));
 
     async function handleFile(file) {
       if (!file.name.endsWith('.csv') && file.type !== 'text/csv') { showErr('Please upload a CSV file.'); return; }
@@ -1222,20 +1265,19 @@
         const text = await new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = () => rej(new Error('Read error')); r.readAsText(file); });
         setStatus('Parsing CSV…', 15); await tick();
         const txs = await parseCSV(text);
-        setStatus(`Parsed ${txs.length.toLocaleString()} transactions. Building graph…`, 30); await tick();
+        setStatus(`Parsed ${txs.length.toLocaleString()} transactions. Building graph…`, 28); await tick();
         const graph = buildGraph(txs);
         const thresh = merchantThreshold(graph.nodeAmounts);
-        setStatus('Running cycle detection (DFS)…', 48); await tick();
-        setStatus('Detecting smurfing patterns…', 62); await tick();
-        setStatus('Scanning shell chains…', 75); await tick();
+        setStatus('Running cycle detection (DFS)…', 42); await tick();
+        setStatus('Detecting smurfing patterns…', 58); await tick();
+        setStatus('Scanning shell chains…', 72); await tick();
         const res = runAnalysis(graph, txs, thresh);
         result = res; allTxs = txs;
         const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
-        setStatus(`Analysis complete in ${elapsed}s. Rendering…`, 88); await tick();
+        setStatus(`Analysis complete in ${elapsed}s. Rendering graph…`, 85); await tick();
         renderGraph(txs, res.suspiciousAccounts, res.fraudRings);
-        setStatus('Generating report…', 95); await tick();
+        setStatus('Generating report…', 94); await tick();
         renderTable(res.fraudRings, res.suspiciousAccounts);
-        // Stats
         document.getElementById('s-txns').textContent = txs.length.toLocaleString();
         document.getElementById('s-susp').textContent = res.suspiciousAccounts.length;
         document.getElementById('s-rings').textContent = res.fraudRings.length;
@@ -1259,7 +1301,7 @@
     function resetApp(showUp = true) {
       result = null; allTxs = null;
       if (cy) cy.elements().remove();
-      document.getElementById('results-container').innerHTML = '';
+      const rc = document.getElementById('results-container'); if (rc) rc.innerHTML = '';
       document.getElementById('graph-sec').style.display = 'none';
       document.getElementById('results-sec').style.display = 'none';
       document.getElementById('stats-bar').style.display = 'none';
@@ -1272,8 +1314,10 @@
       document.getElementById('node-panel').style.display = 'none';
     }
 
-    // Sample CSV data (embedded)
-    const SAMPLE_CSV = `transaction_id,sender_id,receiver_id,amount,timestamp
+    // ════════════════════════════════════════════════════════════
+    // SAMPLE DATA
+    // ════════════════════════════════════════════════════════════
+    const SAMPLE = `transaction_id,sender_id,receiver_id,amount,timestamp
 T001,ACC_A,ACC_B,5000,2025-01-01 10:00:00
 T002,ACC_B,ACC_C,4800,2025-01-01 11:00:00
 T003,ACC_C,ACC_A,4600,2025-01-01 12:00:00
@@ -1318,9 +1362,15 @@ T041,ACC_PP,ACC_OO,10100,2025-01-07 09:30:00
 T042,ACC_OO,ACC_QQ,50000,2025-01-07 18:00:00
 T043,ACC_A,ACC_D,2000,2025-01-08 10:00:00
 T044,ACC_D,ACC_B,1900,2025-01-08 11:00:00
-T045,ACC_B,ACC_A,1800,2025-01-08 12:00:00`;
+T045,ACC_B,ACC_A,1800,2025-01-08 12:00:00
+T046,ACC_A,ACC_C,1700,2025-01-09 09:00:00
+T047,ACC_C,ACC_B,1600,2025-01-09 10:00:00
+T048,ACC_B,ACC_D,1500,2025-01-09 11:00:00
+T049,ACC_D,ACC_A,1400,2025-01-09 12:00:00`;
 
-    // ─── Event Wiring ───
+    // ════════════════════════════════════════════════════════════
+    // EVENT WIRING
+    // ════════════════════════════════════════════════════════════
     document.addEventListener('DOMContentLoaded', () => {
       initViz();
       const dz = document.getElementById('dropzone');
@@ -1331,17 +1381,15 @@ T045,ACC_B,ACC_A,1800,2025-01-08 12:00:00`;
       fi.addEventListener('change', e => { const f = e.target.files[0]; if (f) handleFile(f); });
 
       document.getElementById('btn-demo').addEventListener('click', () => {
-        const blob = new Blob([SAMPLE_CSV], { type: 'text/csv' });
-        handleFile(new File([blob], 'sample.csv', { type: 'text/csv' }));
+        handleFile(new File([new Blob([SAMPLE], { type: 'text/csv' })], 'sample.csv', { type: 'text/csv' }));
       });
 
       document.getElementById('btn-reset').addEventListener('click', () => resetApp(true));
 
       document.getElementById('btn-dl').addEventListener('click', () => {
         if (!result) return;
-        const now = new Date();
         const data = {
-          generated_at: now.toISOString().slice(0, 19) + 'Z',
+          generated_at: new Date().toISOString().replace(/\.\d+Z$/, 'Z'),
           total_transactions_analyzed: allTxs.length,
           suspicious_accounts: result.suspiciousAccounts,
           fraud_rings: result.fraudRings
