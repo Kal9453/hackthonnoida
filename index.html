@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RIFT 2026 | Financial Forensics Engine</title>
+  <meta name="description"
+    content="RIFT 2026 Money Muling Detection – Detect circular fund routing, smurfing, and shell chains from transaction CSV data." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --bg: #070b1a;
+      --bg-card: #0d1230;
+      --bg-card2: #111830;
+      --bg-hover: #161e3a;
+      --border: #1e2850;
+      --border-glow: #2d3a80;
+      --text: #e8eaf6;
+      --muted: #7986cb;
+      --dim: #3f4c8a;
+      --blue: #4f8ef7;
+      --purple: #9c6bff;
+      --cyan: #00e5ff;
+      --danger: #ff2d55;
+      --warn: #ffd166;
+      --ok: #06d6a0;
+      --r-sm: 8px;
+      --r-md: 14px;
+      --r-lg: 20px;
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(79, 142, 247, .06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 90%, rgba(156, 107, 255, .06) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 60% 40%, rgba(255, 45, 85, .04) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0
+    }
+
+    /* Header */
+    .hdr {
+      position: relative;
+      z-index: 10;
+      padding: 22px 36px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap
+    }
+
+    .hdr-logo {
+      display: flex;
+      align-items: center;
+      gap: 14px
+    }
+
+    .hdr-badge {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #4f8ef7, #9c6bff);
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      box-shadow: 0 0 24px rgba(79, 142, 247, .4);
+      flex-shrink: 0
+    }
+
+    .hdr-title {
+      font-size: clamp(1rem, 2.5vw, 1.4rem);
+      font-weight: 800;
+      letter-spacing: -.02em;
+      background: linear-gradient(135deg, #e8eaf6 30%, #4f8ef7 60%, #9c6bff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2
+    }
+
+    .hdr-sub {
+      font-size: .72rem;
+      color: var(--muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-top: 2px
+    }
+
+    .hdr-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 17px;
+      border: none;
+      border-radius: var(--r-sm);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      white-space: nowrap
+    }
+
+    .btn:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+      transform: none !important
+    }
+
+    .btn-pri {
+      background: linear-gradient(135deg, #4f8ef7, #7c4dff);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(79, 142, 247, .3)
+    }
+
+    .btn-pri:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(79, 142, 247, .45)
+    }
+
+    .btn-ok {
+      background: linear-gradient(135deg, #06d6a0, #0899cc);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(6, 214, 160, .3)
+    }
+
+    .btn-ok:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(6, 214, 160, .45)
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border)
+    }
+
+    .btn-ghost:hover {
+      background: var(--bg-hover);
+      color: var(--text);
+      border-color: var(--border-glow)
+    }
+
+    /* Main */
+    main {
+      position: relative;
+      z-index: 1;
+      padding: 28px 36px 60px;
+      max-width: 1600px;
+      margin: 0 auto
+    }
+
+    /* Stats bar */
+    .stats-bar {
+      display: none;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 22px
+    }
+
+    .stat-card {
+      flex: 1;
+      min-width: 105px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 13px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      transition: border-color .2s
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-glow)
+    }
+
+    .stat-lbl {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em
+    }
+
+    .stat-val {
+      font-size: 1.55rem;
+      font-weight: 800;
+      font-family: 'Space Mono', monospace
+    }
+
+    .c-danger {
+      color: var(--danger)
+    }
+
+    .c-warn {
+      color: var(--warn)
+    }
+
+    .c-ok {
+      color: var(--ok)
+    }
+
+    .c-blue {
+      color: var(--blue)
+    }
+
+    .c-purple {
+      color: var(--purple)
+    }
+
+    /* Upload */
+    #upload-sec {
+      margin-bottom: 24px
+    }
+
+    .upload-card {
+      background: var(--bg-card);
+      border: 2px dashed var(--border-glow);
+      border-radius: var(--r-lg);
+      padding: 52px 36px;
+      text-align: center;
+      transition: all .25s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden
+    }
+
+    .upload-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(79, 142, 247, .05), transparent 70%);
+      pointer-events: none
+    }
+
+    .upload-card:hover,
+    .upload-card.drag-over {
+      border-color: var(--blue);
+      background: var(--bg-hover);
+      box-shadow: 0 0 40px rgba(79, 142, 247, .1)
+    }
+
+    .upload-icon {
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 18px;
+      background: linear-gradient(135deg, rgba(79, 142, 247, .15), rgba(156, 107, 255, .15));
+      border: 2px solid rgba(79, 142, 247, .3);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      animation: float 3s ease-in-out infinite
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(-8px)
+      }
+    }
+
+    .upload-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 8px
+    }
+
+    .upload-sub {
+      color: var(--muted);
+      font-size: .875rem;
+      margin-bottom: 18px
+    }
+
+    .upload-acts {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap
+    }
+
+    .csv-hint {
+      margin-top: 18px;
+      display: inline-flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      justify-content: center
+    }
+
+    .csv-tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      background: rgba(79, 142, 247, .1);
+      border: 1px solid rgba(79, 142, 247, .2);
+      color: var(--blue);
+      padding: 3px 10px;
+      border-radius: 20px
+    }
+
+    /* Processing */
+    #proc-sec {
+      display: none;
+      margin-bottom: 24px
+    }
+
+    .proc-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 40px;
+      text-align: center
+    }
+
+    .spinner {
+      width: 54px;
+      height: 54px;
+      margin: 0 auto 18px;
+      border: 3px solid rgba(79, 142, 247, .15);
+      border-top: 3px solid var(--blue);
+      border-right: 3px solid var(--purple);
+      border-radius: 50%;
+      animation: spin .8s linear infinite
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    .proc-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 6px
+    }
+
+    #status-text {
+      color: var(--muted);
+      font-size: .875rem;
+      margin-bottom: 18px
+    }
+
+    .prog-track {
+      height: 6px;
+      background: rgba(255, 255, 255, .06);
+      border-radius: 3px;
+      overflow: hidden
+    }
+
+    #prog-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--blue), var(--purple));
+      border-radius: 3px;
+      transition: width .4s ease;
+      box-shadow: 0 0 12px rgba(79, 142, 247, .5)
+    }
+
+    /* Error */
+    #err-banner {
+      display: none;
+      background: rgba(255, 45, 85, .12);
+      border: 1px solid rgba(255, 45, 85, .4);
+      color: #ff6b8a;
+      padding: 11px 18px;
+      border-radius: var(--r-sm);
+      font-size: .875rem;
+      margin-bottom: 18px
+    }
+
+    /* Graph */
+    #graph-sec {
+      display: none;
+      margin-bottom: 24px
+    }
+
+    .graph-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden
+    }
+
+    .graph-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 18px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 8px
+    }
+
+    .graph-lft {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap
+    }
+
+    .graph-title-lbl {
+      font-weight: 700;
+      font-size: .95rem
+    }
+
+    .legend {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap
+    }
+
+    .leg {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid
+    }
+
+    .dot.crit {
+      background: rgba(255, 45, 85, .2);
+      border-color: #ff2d55
+    }
+
+    .dot.warn {
+      background: rgba(255, 209, 102, .2);
+      border-color: #ffd166
+    }
+
+    .dot.norm {
+      background: rgba(30, 33, 64, .8);
+      border-color: #3a3f5c
+    }
+
+    .flt-sel {
+      background: var(--bg-card2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 7px 11px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      outline: none
+    }
+
+    .flt-sel:focus {
+      border-color: var(--blue)
+    }
+
+    .flt-sel:disabled {
+      opacity: .4
+    }
+
+    #graph-wrap {
+      position: relative
+    }
+
+    #cy {
+      width: 100%;
+      height: 500px;
+      background: #06091a
+    }
+
+    #node-panel {
+      display: none;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(13, 18, 48, .95);
+      border: 1px solid var(--border-glow);
+      border-radius: var(--r-md);
+      padding: 13px 16px;
+      font-size: .85rem;
+      backdrop-filter: blur(12px);
+      min-width: 170px;
+      z-index: 100
+    }
+
+    #node-panel h4 {
+      font-size: .88rem;
+      margin-bottom: 7px;
+      color: var(--blue)
+    }
+
+    /* Results */
+    #results-sec {
+      display: none
+    }
+
+    .res-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 8px
+    }
+
+    .res-title {
+      font-size: 1.05rem;
+      font-weight: 700
+    }
+
+    .res-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px
+    }
+
+    @media(max-width:1100px) {
+      .res-grid {
+        grid-template-columns: 1fr
+      }
+    }
+
+    /* Table sections */
+    .tbl-sec {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden
+    }
+
+    .sec-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: .9rem;
+      font-weight: 700;
+      padding: 13px 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-card2)
+    }
+
+    .cnt-badge {
+      margin-left: auto;
+      background: rgba(79, 142, 247, .15);
+      color: var(--blue);
+      border: 1px solid rgba(79, 142, 247, .3);
+      padding: 2px 9px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700
+    }
+
+    .tbl-wrap {
+      overflow-x: auto;
+      max-height: 400px;
+      overflow-y: auto
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px
+    }
+
+    thead {
+      position: sticky;
+      top: 0;
+      z-index: 5
+    }
+
+    th {
+      background: #0a0f26;
+      color: var(--muted);
+      padding: 9px 13px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap
+    }
+
+    td {
+      padding: 9px 13px;
+      border-bottom: 1px solid rgba(255, 255, 255, .04);
+      color: var(--text)
+    }
+
+    tbody tr:hover {
+      background: var(--bg-hover)
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none
+    }
+
+    .mono {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      color: var(--cyan)
+    }
+
+    .mbrs {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      max-width: 190px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .empty-r {
+      text-align: center;
+      color: var(--dim);
+      padding: 28px 13px
+    }
+
+    /* Score pills */
+    .pill {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      font-weight: 700
+    }
+
+    .pill-hi {
+      background: rgba(255, 45, 85, .15);
+      color: #ff4d6d;
+      border: 1px solid rgba(255, 45, 85, .3)
+    }
+
+    .pill-md {
+      background: rgba(255, 209, 102, .15);
+      color: #ffd166;
+      border: 1px solid rgba(255, 209, 102, .3)
+    }
+
+    .pill-lo {
+      background: rgba(6, 214, 160, .15);
+      color: #06d6a0;
+      border: 1px solid rgba(6, 214, 160, .3)
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      margin: 1px
+    }
+
+    .b-cycle {
+      background: rgba(255, 107, 107, .15);
+      color: #ff6b6b;
+      border: 1px solid rgba(255, 107, 107, .3)
+    }
+
+    .b-smurfing {
+      background: rgba(255, 209, 102, .15);
+      color: #ffd166;
+      border: 1px solid rgba(255, 209, 102, .3)
+    }
+
+    .b-shell {
+      background: rgba(156, 107, 255, .15);
+      color: #b388ff;
+      border: 1px solid rgba(156, 107, 255, .3)
+    }
+
+    /* Tooltip */
+    .cy-tip {
+      position: fixed;
+      z-index: 9999;
+      background: rgba(13, 18, 48, .95);
+      border: 1px solid var(--border-glow);
+      color: var(--text);
+      padding: 9px 13px;
+      border-radius: var(--r-sm);
+      font-size: 12px;
+      line-height: 1.6;
+      pointer-events: none;
+      max-width: 190px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .4);
+      display: none
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg)
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-glow);
+      border-radius: 3px
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--blue)
+    }
+
+    footer {
+      text-align: center;
+      padding: 22px;
+      color: var(--dim);
+      font-size: 12px;
+      border-top: 1px solid var(--border);
+      position: relative;
+      z-index: 1
+    }
+
+    @media(max-width:768px) {
+      .hdr {
+        padding: 14px 18px
+      }
+
+      main {
+        padding: 16px 18px 40px
+      }
+
+      .upload-card {
+        padding: 36px 18px
+      }
+
+      #cy {
+        height: 340px
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="hdr">
+    <div class="hdr-logo">
+      <div class="hdr-badge">🔍</div>
+      <div>
+        <div class="hdr-title">RIFT 2026 · Financial Forensics Engine</div>
+        <div class="hdr-sub">Money Muling Detection Challenge · Graph Intelligence Platform</div>
+      </div>
+    </div>
+    <div class="hdr-actions">
+      <button class="btn btn-ghost" id="btn-reset">↺ Reset</button>
+      <button class="btn btn-ok" id="btn-dl" disabled>⬇ Download JSON</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="stats-bar" id="stats-bar">
+      <div class="stat-card"><span class="stat-lbl">Transactions</span><span class="stat-val c-blue"
+          id="s-txns">0</span></div>
+      <div class="stat-card"><span class="stat-lbl">Suspicious</span><span class="stat-val c-danger"
+          id="s-susp">0</span></div>
+      <div class="stat-card"><span class="stat-lbl">Fraud Rings</span><span class="stat-val c-danger"
+          id="s-rings">0</span></div>
+      <div class="stat-card"><span class="stat-lbl">Cycles Found</span><span class="stat-val c-warn"
+          id="s-cycles">0</span></div>
+      <div class="stat-card"><span class="stat-lbl">Smurf Nodes</span><span class="stat-val c-warn"
+          id="s-smurfs">0</span></div>
+      <div class="stat-card"><span class="stat-lbl">Time Elapsed</span><span class="stat-val c-ok" id="s-time">—</span>
+      </div>
+    </div>
+
+    <div id="err-banner"></div>
+
+    <section id="upload-sec">
+      <div class="upload-card" id="dropzone">
+        <div class="upload-icon">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#4f8ef7" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </svg>
+        </div>
+        <div class="upload-title">Drop your transaction CSV here</div>
+        <div class="upload-sub">CSV with columns: transaction_id, sender_id, receiver_id, amount, timestamp · 10K+ rows
+          supported</div>
+        <div class="upload-acts">
+          <button class="btn btn-pri" onclick="document.getElementById('file-in').click();event.stopPropagation()">📂
+            Choose CSV File</button>
+          <button class="btn btn-ghost" id="btn-demo">⚗️ Load Sample Data</button>
+        </div>
+        <div class="csv-hint">
+          <span class="csv-tag">transaction_id</span><span class="csv-tag">sender_id</span><span
+            class="csv-tag">receiver_id</span><span class="csv-tag">amount</span><span class="csv-tag">timestamp</span>
+        </div>
+        <input type="file" id="file-in" accept=".csv,text/csv" style="display:none" />
+      </div>
+    </section>
+
+    <section id="proc-sec">
+      <div class="proc-card">
+        <div class="spinner"></div>
+        <div class="proc-title">Analyzing Transaction Network…</div>
+        <div id="status-text">Initializing…</div>
+        <div class="prog-track">
+          <div id="prog-fill"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="graph-sec">
+      <div class="graph-card">
+        <div class="graph-bar">
+          <div class="graph-lft">
+            <span class="graph-title-lbl">🕸️ Transaction Network Graph</span>
+            <div class="legend">
+              <span class="leg"><span class="dot crit"></span>Critical (≥70)</span>
+              <span class="leg"><span class="dot warn"></span>Moderate (40–69)</span>
+              <span class="leg"><span class="dot norm"></span>Normal</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select class="flt-sel" id="graph-filter" disabled>
+              <option value="all">All Nodes</option>
+              <option value="suspicious">Suspicious Only</option>
+              <option value="rings">Ring Members Only</option>
+            </select>
+          </div>
+        </div>
+        <div id="graph-wrap">
+          <div id="cy"></div>
+          <div id="node-panel">
+            <h4 id="np-id">—</h4>
+            <p id="np-score"></p>
+            <p id="np-cat"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="results-sec">
+      <div class="res-hdr">
+        <div class="res-title">📊 Forensics Report</div>
+        <button class="btn btn-ok" onclick="document.getElementById('btn-dl').click()">⬇ Download JSON Report</button>
+      </div>
+      <div id="results-container"></div>
+    </section>
+  </main>
+
+  <footer>RIFT 2026 Financial Forensics Engine · All processing runs in-browser · No transaction data transmitted
+  </footer>
+  <div class="cy-tip" id="cy-tip"></div>
+
+  <script>
+    // ═══════════════════════════════════════════════════════
+    // PARSER
+    // ═══════════════════════════════════════════════════════
+    function parseCSV(text) {
+      return new Promise((res, rej) => {
+        Papa.parse(text, {
+          header: true, skipEmptyLines: true, dynamicTyping: false,
+          complete(r) {
+            const req = ['transaction_id', 'sender_id', 'receiver_id', 'amount', 'timestamp'];
+            const miss = req.filter(f => !(r.meta.fields || []).includes(f));
+            if (miss.length) { rej(new Error('Missing columns: ' + miss.join(', '))); return; }
+            const txs = r.data
+              .filter(row => row.transaction_id && row.sender_id && row.receiver_id)
+              .map(row => ({
+                transaction_id: String(row.transaction_id).trim(),
+                sender_id: String(row.sender_id).trim(),
+                receiver_id: String(row.receiver_id).trim(),
+                amount: parseFloat(row.amount) || 0,
+                timestamp: new Date(row.timestamp).getTime(),
+                timestamp_raw: String(row.timestamp).trim()
+              })).filter(r => !isNaN(r.timestamp));
+            if (!txs.length) { rej(new Error('No valid transactions found')); return; }
+            res(txs);
+          },
+          error(e) { rej(new Error('CSV parse error: ' + e.message)); }
+        });
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // GRAPH BUILDER
+    // ═══════════════════════════════════════════════════════
+    function buildGraph(txs) {
+      const outgoing = new Map(), incoming = new Map(), nodes = new Set();
+      const nodeOut = new Map(), nodeIn = new Map();
+      const nodeTxCount = new Map(), nodeAmounts = new Map();
+
+      for (const { sender_id: s, receiver_id: r, amount, timestamp } of txs) {
+        nodes.add(s); nodes.add(r);
+        if (!outgoing.has(s)) outgoing.set(s, new Set());
+        outgoing.get(s).add(r);
+        if (!incoming.has(r)) incoming.set(r, new Set());
+        incoming.get(r).add(s);
+        if (!nodeOut.has(s)) nodeOut.set(s, []);
+        nodeOut.get(s).push({ to: r, amount, ts: timestamp });
+        if (!nodeIn.has(r)) nodeIn.set(r, []);
+        nodeIn.get(r).push({ from: s, amount, ts: timestamp });
+        nodeTxCount.set(s, (nodeTxCount.get(s) || 0) + 1);
+        nodeTxCount.set(r, (nodeTxCount.get(r) || 0) + 1);
+        if (!nodeAmounts.has(s)) nodeAmounts.set(s, []);
+        nodeAmounts.get(s).push(amount);
+        if (!nodeAmounts.has(r)) nodeAmounts.set(r, []);
+        nodeAmounts.get(r).push(amount);
+      }
+      return { nodes, outgoing, incoming, nodeOut, nodeIn, nodeTxCount, nodeAmounts };
+    }
+
+    function merchantThreshold(nodeAmounts) {
+      const avgs = [];
+      for (const [, amounts] of nodeAmounts) {
+        avgs.push(amounts.reduce((a, b) => a + b, 0) / amounts.length);
+      }
+      avgs.sort((a, b) => a - b);
+      return avgs[Math.floor(avgs.length * 0.95)] || Infinity;
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // ALGORITHMS
+    // ═══════════════════════════════════════════════════════
+    const CYCLE_MIN = 3, CYCLE_MAX = 5;
+    const SMURF_N = 10, SMURF_MS = 72 * 3600 * 1000;
+    const SHELL_MIN = 3, SHELL_MAX = 6, SHELL_TX = 3;
+
+    function detectCycles(graph) {
+      const { outgoing, nodes } = graph;
+      const cycles = [], seen = new Set();
+      function norm(c) { let m = 0; c.forEach((n, i) => { if (n < c[m]) m = i; }); return [...c.slice(m), ...c.slice(0, m)]; }
+      function dfs(start, cur, path, vis) {
+        for (const nb of (outgoing.get(cur) || new Set())) {
+          if (nb === start && path.length >= CYCLE_MIN && path.length <= CYCLE_MAX) {
+            const key = norm([...path]).join('→');
+            if (!seen.has(key)) { seen.add(key); cycles.push([...path]); }
+          } else if (!vis.has(nb) && path.length < CYCLE_MAX) {
+            vis.add(nb); path.push(nb); dfs(start, nb, path, vis); path.pop(); vis.delete(nb);
+          }
+        }
+      }
+      for (const n of nodes) { const v = new Set([n]); dfs(n, n, [n], v); }
+      return cycles;
+    }
+
+    function detectSmurfing(graph, merchThresh) {
+      const { nodes, nodeOut, nodeIn, nodeAmounts } = graph;
+      const smurfs = new Set(), details = new Map();
+      for (const node of nodes) {
+        const amounts = nodeAmounts.get(node) || [];
+        const avg = amounts.length ? amounts.reduce((a, b) => a + b, 0) / amounts.length : 0;
+        const outE = nodeOut.get(node) || [], inE = nodeIn.get(node) || [];
+        if (avg > merchThresh && outE.length < inE.length * 0.1) continue;
+        let maxIn = 0, maxOut = 0;
+        if (inE.length >= SMURF_N) {
+          const s = [...inE].sort((a, b) => a.ts - b.ts);
+          let w = 0; const u = new Set();
+          for (let i = 0; i < s.length; i++) {
+            u.add(s[i].from);
+            while (s[i].ts - s[w].ts > SMURF_MS) { u.delete(s[w].from); w++; }
+            maxIn = Math.max(maxIn, u.size);
+          }
+        }
+        if (outE.length >= SMURF_N) {
+          const s = [...outE].sort((a, b) => a.ts - b.ts);
+          let w = 0; const u = new Set();
+          for (let i = 0; i < s.length; i++) {
+            u.add(s[i].to);
+            while (s[i].ts - s[w].ts > SMURF_MS) { u.delete(s[w].to); w++; }
+            maxOut = Math.max(maxOut, u.size);
+          }
+        }
+        if (maxIn >= SMURF_N || maxOut >= SMURF_N) { smurfs.add(node); details.set(node, { fanIn: maxIn, fanOut: maxOut }); }
+      }
+      return { smurfs, details };
+    }
+
+    function detectShells(graph) {
+      const { nodes, outgoing, nodeTxCount } = graph;
+      const shellNodes = new Set(), chains = [], keys = new Set();
+      function dfs(start, cur, path, depth) {
+        if (depth >= SHELL_MIN) {
+          const ints = path.slice(1, -1);
+          if (ints.some(n => (nodeTxCount.get(n) || 0) <= SHELL_TX)) {
+            const key = path.join('→');
+            if (!keys.has(key)) {
+              keys.add(key); chains.push([...path]);
+              for (const n of ints) if ((nodeTxCount.get(n) || 0) <= SHELL_TX) shellNodes.add(n);
+            }
+          }
+        }
+        if (depth < SHELL_MAX) {
+          for (const nb of (outgoing.get(cur) || new Set())) {
+            if (!path.includes(nb)) { path.push(nb); dfs(start, nb, path, depth + 1); path.pop(); }
+          }
+        }
+      }
+      for (const n of nodes) {
+        if ((nodeTxCount.get(n) || 0) > 0 && (outgoing.get(n) || new Set()).size > 0) dfs(n, n, [n], 0);
+      }
+      return { shellNodes, chains };
+    }
+
+    function computeScores(graph, cycles, smurfRes, shellRes) {
+      const { nodeTxCount } = graph;
+      const { smurfs, details } = smurfRes;
+      const { shellNodes } = shellRes;
+      const nodeCycles = new Map();
+      cycles.forEach((c, i) => c.forEach(n => { if (!nodeCycles.has(n)) nodeCycles.set(n, []); nodeCycles.get(n).push(i); }));
+      const accs = new Map();
+      const ensure = id => { if (!accs.has(id)) accs.set(id, { account_id: id, raw: 0, flags: new Set(), rings: new Set(), flaggedTx: 0 }); return accs.get(id); };
+      for (const [n, idxs] of nodeCycles) { const a = ensure(n); a.flags.add('cycle'); a.raw += 35 * idxs.length; a.flaggedTx += idxs.length; idxs.forEach(i => a.rings.add('ring_' + String(i + 1).padStart(2, '0'))); }
+      for (const n of smurfs) { const a = ensure(n); a.flags.add('smurfing'); const d = details.get(n); if (d.fanIn >= SMURF_N) a.raw += 30; if (d.fanOut >= SMURF_N) a.raw += 30; a.flaggedTx += (d.fanIn || 0) + (d.fanOut || 0); }
+      for (const n of shellNodes) { const a = ensure(n); a.flags.add('shell_chain'); a.raw += 25; a.flaggedTx += nodeTxCount.get(n) || 0; }
+      const out = [];
+      for (const [, a] of accs) {
+        const sc = Math.min(100, Math.round(a.raw));
+        if (sc > 0) out.push({ account_id: a.account_id, suspicion_score: sc, flags: [...a.flags], involved_in_rings: [...a.rings], transactions_flagged: a.flaggedTx });
+      }
+      return out.sort((a, b) => b.suspicion_score - a.suspicion_score);
+    }
+
+    function buildRings(cycles, shellRes, txs) {
+      const lut = new Map();
+      for (const t of txs) { const k = `${t.sender_id}→${t.receiver_id}`; if (!lut.has(k)) lut.set(k, []); lut.get(k).push(t.amount); }
+      const rings = [];
+      cycles.forEach((c, i) => {
+        let tot = 0, cnt = 0;
+        for (let j = 0; j < c.length; j++) { const k = `${c[j]}→${c[(j + 1) % c.length]}`; const a = lut.get(k) || []; tot += a.reduce((x, y) => x + y, 0); cnt += a.length; }
+        rings.push({ ring_id: 'ring_' + String(i + 1).padStart(2, '0'), type: 'circular_routing', members: c, transaction_count: cnt, total_amount: Math.round(tot * 100) / 100 });
+      });
+      shellRes.chains.slice(0, 20).forEach((c, i) => {
+        let tot = 0, cnt = 0;
+        for (let j = 0; j < c.length - 1; j++) { const k = `${c[j]}→${c[j + 1]}`; const a = lut.get(k) || []; tot += a.reduce((x, y) => x + y, 0); cnt += a.length; }
+        if (cnt > 0) rings.push({ ring_id: 'shell_' + String(i + 1).padStart(2, '0'), type: 'shell_chain', members: c, transaction_count: cnt, total_amount: Math.round(tot * 100) / 100 });
+      });
+      return rings;
+    }
+
+    function runAnalysis(graph, txs, thresh) {
+      const cycles = detectCycles(graph);
+      const smurfRes = detectSmurfing(graph, thresh);
+      const shellRes = detectShells(graph);
+      const suspiciousAccounts = computeScores(graph, cycles, smurfRes, shellRes);
+      const fraudRings = buildRings(cycles, shellRes, txs);
+      return { cycles, smurfRes, shellRes, suspiciousAccounts, fraudRings };
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // VISUALIZER
+    // ═══════════════════════════════════════════════════════
+    let cy = null;
+    function initViz() {
+      cy = cytoscape({
+        container: document.getElementById('cy'),
+        style: [
+          { selector: 'node', style: { 'background-color': '#1e2140', 'border-color': '#3a3f5c', 'border-width': 2, 'label': 'data(label)', 'color': '#c5cae9', 'font-size': '10px', 'font-family': 'Inter,sans-serif', 'text-valign': 'center', 'text-halign': 'center', 'width': 38, 'height': 38, 'text-wrap': 'ellipsis', 'text-max-width': '68px' } },
+          { selector: 'node.critical', style: { 'background-color': 'rgba(255,45,85,0.12)', 'border-color': '#ff2d55', 'border-width': 3, 'color': '#ff6b8a', 'width': 54, 'height': 54, 'font-weight': 'bold' } },
+          { selector: 'node.warning', style: { 'background-color': 'rgba(255,209,102,0.1)', 'border-color': '#ffd166', 'border-width': 2.5, 'color': '#ffd166', 'width': 46, 'height': 46 } },
+          { selector: 'edge', style: { 'width': 1.5, 'line-color': '#2a2f50', 'target-arrow-color': '#2a2f50', 'target-arrow-shape': 'triangle', 'curve-style': 'bezier', 'opacity': 0.6, 'arrow-scale': 0.8 } },
+          { selector: 'edge.ring-edge', style: { 'line-color': '#ff6b6b', 'target-arrow-color': '#ff6b6b', 'width': 2.5, 'opacity': 0.9 } },
+          { selector: 'node:selected', style: { 'border-color': '#b388ff', 'border-width': 4 } }
+        ],
+        minZoom: 0.1, maxZoom: 4, wheelSensitivity: 0.3
+      });
+      cy.on('mouseover', 'node', e => {
+        const d = e.target.data();
+        const tip = document.getElementById('cy-tip');
+        const cr = document.getElementById('cy').getBoundingClientRect();
+        const rp = e.renderedPosition;
+        tip.innerHTML = `<strong>${esc(d.label)}</strong><br>Score: <span style="color:${d.score >= 70 ? '#ff4d6d' : d.score >= 40 ? '#ffd166' : '#06d6a0'}">${d.score}</span>/100`;
+        tip.style.left = (cr.left + rp.x + 10) + 'px';
+        tip.style.top = (cr.top + rp.y + 10) + 'px';
+        tip.style.display = 'block';
+      });
+      cy.on('mouseout', 'node', () => document.getElementById('cy-tip').style.display = 'none');
+      cy.on('tap', 'node', e => {
+        const d = e.target.data();
+        document.getElementById('np-id').textContent = d.id;
+        document.getElementById('np-score').innerHTML = 'Score: <strong style="color:' + (d.score >= 70 ? '#ff4d6d' : d.score >= 40 ? '#ffd166' : '#06d6a0') + '">' + d.score + '</strong>/100';
+        document.getElementById('np-cat').textContent = 'Category: ' + d.category;
+        document.getElementById('node-panel').style.display = 'block';
+      });
+    }
+
+    function renderGraph(txs, suspAccs, rings, maxN = 300) {
+      if (!cy) return;
+      cy.elements().remove();
+      const scoreMap = new Map(suspAccs.map(a => [a.account_id, a.suspicion_score]));
+      const ringEdges = new Set();
+      for (const r of rings) {
+        if (r.type === 'circular_routing') { for (let i = 0; i < r.members.length; i++)ringEdges.add(r.members[i] + '→' + r.members[(i + 1) % r.members.length]); }
+        else { for (let i = 0; i < r.members.length - 1; i++)ringEdges.add(r.members[i] + '→' + r.members[i + 1]); }
+      }
+      let disp = txs;
+      if (txs.length > maxN * 3) {
+        const sids = new Set(suspAccs.map(a => a.account_id));
+        const susp = txs.filter(t => sids.has(t.sender_id) || sids.has(t.receiver_id));
+        const norm = txs.filter(t => !sids.has(t.sender_id) && !sids.has(t.receiver_id)).slice(0, Math.max(0, maxN * 3 - susp.length));
+        disp = [...susp, ...norm];
+      }
+      const nids = new Set();
+      for (const t of disp) { nids.add(t.sender_id); nids.add(t.receiver_id); }
+      const els = [];
+      for (const id of nids) {
+        const sc = scoreMap.get(id) || 0;
+        const cat = sc >= 70 ? 'critical' : sc >= 40 ? 'warning' : 'normal';
+        els.push({ data: { id, label: id, score: sc, category: cat }, classes: cat });
+      }
+      const eMap = new Map();
+      for (const t of disp) {
+        const k = t.sender_id + '→' + t.receiver_id;
+        if (!eMap.has(k)) eMap.set(k, { cnt: 0, tot: 0 });
+        eMap.get(k).cnt++; eMap.get(k).tot += t.amount;
+      }
+      let ei = 0;
+      for (const [k, v] of eMap) {
+        const [s, t] = k.split('→');
+        els.push({ data: { id: 'e' + (ei++), source: s, target: t, ring: ringEdges.has(k) }, classes: ringEdges.has(k) ? 'ring-edge' : 'normal-edge' });
+      }
+      cy.add(els);
+      cy.layout({ name: 'cose', idealEdgeLength: 100, nodeOverlap: 20, randomize: false, componentSpacing: 100, nodeRepulsion: 450000, edgeElasticity: 100, gravity: 80, numIter: 1000, initialTemp: 200, coolingFactor: 0.95, minTemp: 1.0, fit: true, padding: 40 }).run();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // REPORTER
+    // ═══════════════════════════════════════════════════════
+    function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+    function renderTable(rings, accs) {
+      const c = document.getElementById('results-container');
+      if (!c) return;
+      const topAccs = accs.slice(0, 25);
+      const aRows = topAccs.map(a => {
+        const pc = a.suspicion_score >= 70 ? 'pill-hi' : a.suspicion_score >= 40 ? 'pill-md' : 'pill-lo';
+        const badges = a.flags.map(f => `<span class="badge b-${f.replace('_', '-')}">${f.replace('_', ' ')}</span>`).join('');
+        return `<tr><td class="mono">${esc(a.account_id)}</td><td><span class="pill ${pc}">${a.suspicion_score}</span></td><td>${badges}</td><td>${a.transactions_flagged}</td><td>${a.involved_in_rings.length ? a.involved_in_rings.join(', ') : '—'}</td></tr>`;
+      }).join('');
+      const rRows = rings.slice(0, 30).map(r => {
+        const tl = r.type === 'circular_routing' ? '🔄 Circular' : '🔗 Shell Chain';
+        const mem = r.members.slice(0, 3).map(esc).join(' → ') + (r.members.length > 3 ? ` …+${r.members.length - 3}` : '');
+        return `<tr><td class="mono">${esc(r.ring_id)}</td><td>${tl}</td><td>${r.members.length}</td><td>$${r.total_amount.toLocaleString()}</td><td>${r.transaction_count}</td><td class="mbrs" title="${esc(r.members.join(' → '))}">${mem}</td></tr>`;
+      }).join('');
+      c.innerHTML = `<div class="res-grid">
+    <div class="tbl-sec">
+      <div class="sec-title">🛡️ Suspicious Accounts<span class="cnt-badge">${accs.length}</span></div>
+      <div class="tbl-wrap"><table><thead><tr><th>Account ID</th><th>Score</th><th>Flags</th><th>Txns</th><th>Rings</th></tr></thead>
+      <tbody>${aRows || '<tr><td colspan="5" class="empty-r">None detected</td></tr>'}</tbody></table></div>
+    </div>
+    <div class="tbl-sec">
+      <div class="sec-title">🌐 Fraud Rings<span class="cnt-badge">${rings.length}</span></div>
+      <div class="tbl-wrap"><table><thead><tr><th>Ring ID</th><th>Type</th><th>Members</th><th>Amount</th><th>Txns</th><th>Path</th></tr></thead>
+      <tbody>${rRows || '<tr><td colspan="6" class="empty-r">None detected</td></tr>'}</tbody></table></div>
+    </div>
+  </div>`;
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // APP STATE
+    // ═══════════════════════════════════════════════════════
+    let result = null, allTxs = null;
+
+    function setStatus(msg, pct) { document.getElementById('status-text').textContent = msg; document.getElementById('prog-fill').style.width = pct + '%'; }
+    function showErr(m) { const e = document.getElementById('err-banner'); e.textContent = '⚠️ ' + m; e.style.display = 'block'; setTimeout(() => e.style.display = 'none', 6000); }
+    function tick() { return new Promise(r => setTimeout(r, 0)); }
+
+    async function handleFile(file) {
+      if (!file.name.endsWith('.csv') && file.type !== 'text/csv') { showErr('Please upload a CSV file.'); return; }
+      resetApp(false);
+      document.getElementById('proc-sec').style.display = 'block';
+      document.getElementById('upload-sec').style.display = 'none';
+      const t0 = Date.now();
+      try {
+        setStatus('Reading file…', 5);
+        const text = await new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = () => rej(new Error('Read error')); r.readAsText(file); });
+        setStatus('Parsing CSV…', 15); await tick();
+        const txs = await parseCSV(text);
+        setStatus(`Parsed ${txs.length.toLocaleString()} transactions. Building graph…`, 30); await tick();
+        const graph = buildGraph(txs);
+        const thresh = merchantThreshold(graph.nodeAmounts);
+        setStatus('Running cycle detection (DFS)…', 48); await tick();
+        setStatus('Detecting smurfing patterns…', 62); await tick();
+        setStatus('Scanning shell chains…', 75); await tick();
+        const res = runAnalysis(graph, txs, thresh);
+        result = res; allTxs = txs;
+        const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+        setStatus(`Analysis complete in ${elapsed}s. Rendering…`, 88); await tick();
+        renderGraph(txs, res.suspiciousAccounts, res.fraudRings);
+        setStatus('Generating report…', 95); await tick();
+        renderTable(res.fraudRings, res.suspiciousAccounts);
+        // Stats
+        document.getElementById('s-txns').textContent = txs.length.toLocaleString();
+        document.getElementById('s-susp').textContent = res.suspiciousAccounts.length;
+        document.getElementById('s-rings').textContent = res.fraudRings.length;
+        document.getElementById('s-cycles').textContent = res.cycles.length;
+        document.getElementById('s-smurfs').textContent = res.smurfRes.smurfs.size;
+        document.getElementById('s-time').textContent = elapsed + 's';
+        document.getElementById('proc-sec').style.display = 'none';
+        document.getElementById('graph-sec').style.display = 'block';
+        document.getElementById('results-sec').style.display = 'block';
+        document.getElementById('stats-bar').style.display = 'flex';
+        document.getElementById('btn-dl').disabled = false;
+        document.getElementById('graph-filter').disabled = false;
+        setStatus('Done', 100);
+      } catch (e) {
+        document.getElementById('proc-sec').style.display = 'none';
+        document.getElementById('upload-sec').style.display = 'block';
+        showErr(e.message); console.error(e);
+      }
+    }
+
+    function resetApp(showUp = true) {
+      result = null; allTxs = null;
+      if (cy) cy.elements().remove();
+      document.getElementById('results-container').innerHTML = '';
+      document.getElementById('graph-sec').style.display = 'none';
+      document.getElementById('results-sec').style.display = 'none';
+      document.getElementById('stats-bar').style.display = 'none';
+      document.getElementById('proc-sec').style.display = 'none';
+      if (showUp) document.getElementById('upload-sec').style.display = 'block';
+      document.getElementById('btn-dl').disabled = true;
+      document.getElementById('graph-filter').disabled = true;
+      document.getElementById('err-banner').style.display = 'none';
+      document.getElementById('file-in').value = '';
+      document.getElementById('node-panel').style.display = 'none';
+    }
+
+    // Sample CSV data (embedded)
+    const SAMPLE_CSV = `transaction_id,sender_id,receiver_id,amount,timestamp
+T001,ACC_A,ACC_B,5000,2025-01-01 10:00:00
+T002,ACC_B,ACC_C,4800,2025-01-01 11:00:00
+T003,ACC_C,ACC_A,4600,2025-01-01 12:00:00
+T004,ACC_D,ACC_E,1000,2025-01-02 08:00:00
+T005,ACC_F,ACC_E,1100,2025-01-02 08:30:00
+T006,ACC_G,ACC_E,1200,2025-01-02 09:00:00
+T007,ACC_H,ACC_E,1300,2025-01-02 09:30:00
+T008,ACC_I,ACC_E,1400,2025-01-02 10:00:00
+T009,ACC_J,ACC_E,1500,2025-01-02 10:30:00
+T010,ACC_K,ACC_E,1600,2025-01-02 11:00:00
+T011,ACC_L,ACC_E,1700,2025-01-02 11:30:00
+T012,ACC_M,ACC_E,1800,2025-01-02 12:00:00
+T013,ACC_N,ACC_E,1900,2025-01-02 12:30:00
+T014,ACC_E,ACC_O,18000,2025-01-02 20:00:00
+T015,ACC_P,ACC_Q,500,2025-01-03 06:00:00
+T016,ACC_Q,ACC_R,480,2025-01-03 07:00:00
+T017,ACC_R,ACC_S,460,2025-01-03 08:00:00
+T018,ACC_S,ACC_T,440,2025-01-03 09:00:00
+T019,ACC_X,ACC_Y,3000,2025-01-04 10:00:00
+T020,ACC_Y,ACC_Z,2900,2025-01-04 11:00:00
+T021,ACC_Z,ACC_X,2800,2025-01-04 12:00:00
+T022,ACC_X,ACC_Y,2700,2025-01-04 13:00:00
+T023,ACC_Y,ACC_Z,2600,2025-01-04 14:00:00
+T024,ACC1,ACC2,100,2025-01-05 08:00:00
+T025,ACC_U,ACC2,200,2025-01-05 08:10:00
+T026,ACC_V,ACC2,300,2025-01-05 08:20:00
+T027,ACC_W,ACC2,400,2025-01-05 08:30:00
+T028,ACC_AA,ACC2,500,2025-01-05 08:40:00
+T029,ACC_BB,ACC2,600,2025-01-05 08:50:00
+T030,ACC_CC,ACC2,700,2025-01-05 09:00:00
+T031,ACC_DD,ACC2,800,2025-01-05 09:10:00
+T032,ACC_EE,ACC2,900,2025-01-05 09:20:00
+T033,ACC_FF,ACC2,1000,2025-01-05 09:30:00
+T034,ACC_GG,ACC2,1100,2025-01-05 09:40:00
+T035,ACC2,ACC_HH,9000,2025-01-05 20:00:00
+T036,ACC_II,ACC_JJ,250,2025-01-06 10:00:00
+T037,ACC_JJ,ACC_KK,240,2025-01-06 11:00:00
+T038,ACC_KK,ACC_LL,230,2025-01-06 12:00:00
+T039,ACC_LL,ACC_MM,220,2025-01-06 13:00:00
+T040,ACC_NN,ACC_OO,10000,2025-01-07 09:00:00
+T041,ACC_PP,ACC_OO,10100,2025-01-07 09:30:00
+T042,ACC_OO,ACC_QQ,50000,2025-01-07 18:00:00
+T043,ACC_A,ACC_D,2000,2025-01-08 10:00:00
+T044,ACC_D,ACC_B,1900,2025-01-08 11:00:00
+T045,ACC_B,ACC_A,1800,2025-01-08 12:00:00`;
+
+    // ─── Event Wiring ───
+    document.addEventListener('DOMContentLoaded', () => {
+      initViz();
+      const dz = document.getElementById('dropzone');
+      const fi = document.getElementById('file-in');
+      dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+      dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+      dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
+      fi.addEventListener('change', e => { const f = e.target.files[0]; if (f) handleFile(f); });
+
+      document.getElementById('btn-demo').addEventListener('click', () => {
+        const blob = new Blob([SAMPLE_CSV], { type: 'text/csv' });
+        handleFile(new File([blob], 'sample.csv', { type: 'text/csv' }));
+      });
+
+      document.getElementById('btn-reset').addEventListener('click', () => resetApp(true));
+
+      document.getElementById('btn-dl').addEventListener('click', () => {
+        if (!result) return;
+        const now = new Date();
+        const data = {
+          generated_at: now.toISOString().slice(0, 19) + 'Z',
+          total_transactions_analyzed: allTxs.length,
+          suspicious_accounts: result.suspiciousAccounts,
+          fraud_rings: result.fraudRings
+        };
+        const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+        const a = document.createElement('a'); a.href = url; a.download = 'rift_forensics_report.json'; a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      document.getElementById('graph-filter').addEventListener('change', e => {
+        if (!result || !allTxs) return;
+        const f = e.target.value;
+        let txs = allTxs;
+        if (f === 'suspicious') { const ids = new Set(result.suspiciousAccounts.map(a => a.account_id)); txs = allTxs.filter(t => ids.has(t.sender_id) || ids.has(t.receiver_id)); }
+        else if (f === 'rings') { const ids = new Set(result.fraudRings.flatMap(r => r.members)); txs = allTxs.filter(t => ids.has(t.sender_id) || ids.has(t.receiver_id)); }
+        renderGraph(txs, result.suspiciousAccounts, result.fraudRings);
+      });
+    });
+  </script>
+</body>
+
+</html>
