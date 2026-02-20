@@ -14,6 +14,7 @@
     rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     *,
     *::before,
@@ -1298,10 +1299,22 @@
         </div>
       </div>
 
-      <!-- RIGHT COLUMN: TABLES -->
+      <!-- RIGHT COLUMN: TABLES & CHARTS -->
       <div id="results-sec">
         <div class="res-hdr">
           <div class="res-title">📊 Forensics Report</div>
+        </div>
+
+        <div class="charts-wrap" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+          <div class="tbl-sec" style="padding:15px;text-align:center;">
+            <h4 style="font-family:'Rajdhani',sans-serif;color:var(--cyan);margin-bottom:10px;">Risk Distribution</h4>
+            <div style="position:relative;height:180px;width:100%;"><canvas id="risk-chart"></canvas></div>
+          </div>
+          <div class="tbl-sec" style="padding:15px;text-align:center;">
+            <h4 style="font-family:'Rajdhani',sans-serif;color:var(--cyan);margin-bottom:10px;">Top Suspicious Accounts
+            </h4>
+            <div style="position:relative;height:180px;width:100%;"><canvas id="acc-chart"></canvas></div>
+          </div>
         </div>
 
         <div class="tbl-sec" id="acc-table-sec">
@@ -1767,6 +1780,64 @@
       });
     }
 
+    let riskChartInst = null;
+    let accChartInst = null;
+
+    function renderCharts(accs) {
+      if (riskChartInst) riskChartInst.destroy();
+      if (accChartInst) accChartInst.destroy();
+
+      const riskCanvas = document.getElementById('risk-chart');
+      const accCanvas = document.getElementById('acc-chart');
+      if (!riskCanvas || !accCanvas) return;
+
+      const crit = accs.filter(a => a.suspicion_score >= 70).length;
+      const warn = accs.filter(a => a.suspicion_score >= 40 && a.suspicion_score < 70).length;
+      const norm = accs.filter(a => a.suspicion_score < 40).length;
+
+      riskChartInst = new Chart(riskCanvas.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Critical', 'Moderate', 'Low'],
+          datasets: [{
+            data: [crit, warn, norm],
+            backgroundColor: ['rgba(244, 63, 94, 0.8)', 'rgba(251, 191, 36, 0.8)', 'rgba(16, 185, 129, 0.8)'],
+            borderColor: ['#f43f5e', '#fbbf24', '#10b981'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'right', labels: { color: '#F8FAFC', font: { family: "'Rajdhani', sans-serif" } } } }
+        }
+      });
+
+      const top10 = accs.slice(0, 10);
+      accChartInst = new Chart(accCanvas.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: top10.map(a => a.account_id),
+          datasets: [{
+            label: 'Suspicion Score',
+            data: top10.map(a => a.suspicion_score),
+            backgroundColor: 'rgba(0, 229, 255, 0.6)',
+            borderColor: '#00e5ff',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, max: 100, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94A3B8' } },
+            x: { grid: { display: false }, ticks: { color: '#94A3B8', font: { size: 10 } } }
+          }
+        }
+      });
+    }
+
     // ════════════════════════════════════════════════════════════
     // APP STATE & ORCHESTRATION
     // ════════════════════════════════════════════════════════════
@@ -1800,6 +1871,7 @@
         renderGraph(txs, res.suspiciousAccounts, res.fraudRings);
         setStatus('Generating report…', 94); await tick();
         renderTable(res.fraudRings, res.suspiciousAccounts);
+        renderCharts(res.suspiciousAccounts);
         document.getElementById('s-txns').textContent = txs.length.toLocaleString();
         document.getElementById('s-susp').textContent = res.suspiciousAccounts.length.toLocaleString();
         document.getElementById('s-rings').textContent = res.fraudRings.length.toLocaleString();
