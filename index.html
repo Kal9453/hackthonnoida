@@ -25,7 +25,7 @@
     }
 
     :root {
-      --bg: #06080F;
+      --bg: #03050C;
       --bg-card: rgba(12, 16, 30, 0.75);
       --bg-card2: rgba(18, 23, 45, 0.8);
       --bg-hover: rgba(26, 34, 60, 0.9);
@@ -91,7 +91,7 @@
       z-index: 10;
       padding: 20px 40px;
       border-bottom: 1px solid var(--border);
-      background: rgba(9, 11, 16, 0.6);
+      background: rgba(18, 26, 47, 0.85);
       backdrop-filter: var(--blur);
       display: flex;
       align-items: center;
@@ -1189,6 +1189,21 @@
         height: 340px
       }
     }
+
+    footer {
+      background: rgba(8, 12, 22, 0.95);
+      padding: 24px 20px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      font-family: 'Space Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+      position: relative;
+      z-index: 5;
+    }
   </style>
 </head>
 
@@ -1358,8 +1373,7 @@
     </div>
   </main>
 
-  <footer>RIFT 2026 Financial Forensics Engine · All processing runs in-browser · No transaction data transmitted
-  </footer>
+  <footer>RIFT 2026 operation alpha</footer>
   <div class="cy-tip" id="cy-tip"></div>
 
   <!-- CHATBOT WIDGET -->
