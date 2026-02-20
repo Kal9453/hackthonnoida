@@ -1205,6 +1205,7 @@
     </div>
     <div class="hdr-actions">
       <button class="btn btn-ghost" id="btn-reset">↺ Reset</button>
+      <button class="btn btn-ghost" id="btn-dl-graph" disabled>🖼️ Download Graph</button>
       <button class="btn btn-ok" id="btn-dl" disabled>⬇ Download JSON</button>
     </div>
   </header>
@@ -1818,6 +1819,7 @@
           }
         }, 300);
 
+        document.getElementById('btn-dl-graph').disabled = false;
         document.getElementById('btn-dl').disabled = false;
         document.getElementById('graph-filter').disabled = false;
         setStatus('Done', 100);
@@ -1840,6 +1842,7 @@
       document.getElementById('stats-bar').style.display = 'none';
       document.getElementById('proc-sec').style.display = 'none';
       if (showUp) document.getElementById('upload-sec').style.display = 'block';
+      document.getElementById('btn-dl-graph').disabled = true;
       document.getElementById('btn-dl').disabled = true;
       document.getElementById('graph-filter').disabled = true;
       document.getElementById('err-banner').style.display = 'none';
@@ -1918,6 +1921,15 @@ T049,ACC_D,ACC_A,1400,2025-01-09 12:00:00`;
       });
 
       document.getElementById('btn-reset').addEventListener('click', () => resetApp(true));
+
+      document.getElementById('btn-dl-graph').addEventListener('click', () => {
+        if (!cy) return;
+        const png64 = cy.png({ bg: '#06080F', full: true, scale: 2 });
+        const a = document.createElement('a');
+        a.href = png64;
+        a.download = 'rift_forensics_graph.png';
+        a.click();
+      });
 
       document.getElementById('btn-dl').addEventListener('click', () => {
         if (!result) return;
